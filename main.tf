@@ -149,7 +149,7 @@ resource "aws_security_group" "rabbitmq_nodes" {
 }
 
 resource "aws_launch_configuration" "rabbitmq" {
-  name                 = "${local.cluster_name}"
+  # name                 = "${local.cluster_name}"
   image_id             = "${data.aws_ami_ids.ami.ids[0]}"
   instance_type        = "${var.instance_type}"
   key_name             = "${var.ssh_key_name}"
