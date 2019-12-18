@@ -58,10 +58,25 @@ write_files:
         docker exec rabbitmq rabbitmqctl set_user_tags admin administrator
         docker exec rabbitmq rabbitmqctl add_user rabbit ${rabbit_password}
         docker exec rabbitmq rabbitmqctl add_vhost /
-        docker exec rabbitmq rabbitmqctl set_policy -p / ha-three "^" '{"ha-mode":"exactly", "ha-params":${sync_node_count}, "ha-sync-mode":"automatic", "message-ttl":${message_timeout}, "expires":${message_timeout}}'
+        # docker exec rabbitmq rabbitmqctl set_policy -p / ha-three "^" '{"ha-mode":"exactly", "ha-params":${sync_node_count}, "ha-sync-mode":"automatic", "message-ttl":${message_timeout}, "expires":${message_timeout}}'
+        docker exec rabbitmq rabbitmqctl set_policy -p / ha-three "^" '{"ha-mode":"exactly", "ha-params":${sync_node_count}, "ha-sync-mode":"automatic"}'
         docker exec rabbitmq rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
         docker exec rabbitmq rabbitmqctl set_permissions -p / rabbit ".*" ".*" ".*"
         docker exec rabbitmq rabbitmqctl delete_user guest
+  - path: /etc/cron.hourly/rabbit_cleanup
+    permissions: '0755'
+    content: |
+        #!/bin/bash
+        sleep $((RANDOM % 1800))
+        RUNNING_NODES=$(docker exec -it rabbitmq rabbitmqctl -q cluster_status --formatter json | jq '.running_nodes' | jq -r '.[]')
+        DISK_NODES=$(docker exec -it rabbitmq rabbitmqctl -q cluster_status --formatter json | jq '.disk_nodes' | jq -r '.[]')
+        for NODE in $DISK_NODES; do
+          skip=
+          for RUNNING_NODE in $RUNNING_NODES; do
+            [[ $NODE == $RUNNING_NODE ]] && { skip=1; break; }
+          done
+          [[ -n $skip ]] || docker exec -it rabbitmq rabbitmqctl forget_cluster_node $NODE
+        done
 
 runcmd:
   - yum update -y
