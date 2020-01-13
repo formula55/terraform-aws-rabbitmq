@@ -2,7 +2,7 @@
 write_files:
   - path: /root/conf/enabled_plugins
     content: |
-        [rabbitmq_management].
+        [rabbitmq_management,rabbitmq_shovel,rabbitmq_shovel_management].
   - path: /root/conf/rabbitmq.config
     content: |
         [ { rabbit, [
