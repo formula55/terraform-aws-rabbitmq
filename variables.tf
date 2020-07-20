@@ -25,6 +25,11 @@ variable "subnet_ids" {
   type        = "list"
 }
 
+variable "subnet_ids_elb" {
+  description = "Subnets for RabbitMQ Load Balancer"
+  type        = "list"
+}
+
 variable "nodes_additional_security_group_ids" {
   type    = "list"
   default = []

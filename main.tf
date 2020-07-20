@@ -213,7 +213,7 @@ resource "aws_elb" "elb" {
     target              = "TCP:5672"
   }
 
-  subnets         = ["${var.subnet_ids}"]
+  subnets         = ["${var.subnet_ids_elb}"]
   idle_timeout    = 3600
   internal        = true
   security_groups = ["${aws_security_group.rabbitmq_elb.id}", "${var.elb_additional_security_group_ids}"]
